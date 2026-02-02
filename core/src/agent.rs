@@ -58,3 +58,58 @@ impl<'debate> Agent<'debate> {
         self.debate_history.push(debate);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_agent_creation() {
+        let agent = Agent::new(0, "model".to_string());
+
+        assert!(!agent.is_infected());
+        assert!(agent.is_healthy());
+        assert!(!agent.is_immune());
+        assert_eq!(agent.id, 0);
+        assert_eq!(agent.model, "model");
+    }
+
+    #[test]
+    fn test_agent_infection() {
+        let mut agent = Agent::new(0, "model".to_string());
+        let infector_id = 1;
+
+        agent.infect(infector_id);
+
+        assert!(agent.is_infected());
+        assert!(!agent.is_healthy());
+        assert_eq!(agent.infected_by, Some(infector_id));
+    }
+
+    #[test]
+    fn test_agent_immunity() {
+        let mut agent = Agent::new(0, "model".to_string());
+
+        agent.immune();
+
+        assert!(agent.is_immune());
+        assert!(!agent.is_healthy());
+        assert!(!agent.is_infected());
+    }
+
+    #[test]
+    fn test_infection_status_default() {
+        assert_eq!(InfectionStatus::default(), InfectionStatus::Healthy);
+    }
+
+    #[test]
+    fn test_debate_history() {
+        let mut agent = Agent::new(0, "model".to_string());
+        let debate = crate::debate::Debate::new(0, 1, 2);
+
+        agent.add_debate(&debate);
+
+        assert_eq!(agent.debate_history.len(), 1);
+        assert_eq!(agent.debate_history[0], &debate);
+    }
+}
