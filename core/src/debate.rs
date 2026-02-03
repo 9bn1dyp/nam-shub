@@ -39,6 +39,7 @@ pub struct Debate {
     pub attacker_id: u32,
     pub defender_id: u32,
 
+    // max turns for each agent
     pub max_turns: usize,
     pub exchanges: Vec<Exchange>,
 
