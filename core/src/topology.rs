@@ -1,3 +1,4 @@
+use rand::{Rng, thread_rng};
 use std::collections::{HashMap, HashSet};
 
 // network topology of agents
@@ -139,21 +140,14 @@ impl TopologyBuilder {
         topology
     }
 
-    // random network with deterministic probability
+    // random network with gen_bool
     pub fn random(agent_ids: &[u32], connection_probability: f64) -> Topology {
-        use std::collections::hash_map::RandomState;
-        use std::hash::{BuildHasher, Hash, Hasher};
-
         let mut topology = Topology::new();
-        let hasher = RandomState::new();
+        let mut rng = thread_rng();
 
         for i in 0..agent_ids.len() {
             for j in (i + 1)..agent_ids.len() {
-                let mut h = hasher.build_hasher();
-                (agent_ids[i], agent_ids[j]).hash(&mut h);
-                let rand_val = (h.finish() as f64) / (u64::MAX as f64);
-
-                if rand_val < connection_probability {
+                if rng.gen_bool(connection_probability) {
                     topology.add_connection(agent_ids[i], agent_ids[j]);
                 }
             }
@@ -206,5 +200,16 @@ mod tests {
         for agent in &agents {
             assert_eq!(topology.get_degree(*agent), 3);
         }
+    }
+
+    #[test]
+    fn test_random_topology() {
+        let agent_ids = vec![1, 2, 3, 4, 5];
+
+        let max_probability = TopologyBuilder::random(&agent_ids, 1.0);
+        assert_eq!(max_probability.connection_count(), 10); // max 10 connections from sample of 5
+
+        let low_probability = TopologyBuilder::random(&agent_ids, 0.0);
+        assert_eq!(low_probability.connection_count(), 0);
     }
 }

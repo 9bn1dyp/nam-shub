@@ -43,14 +43,18 @@ impl<'debate> Agent<'debate> {
 
     // init infection called on agents who start with the infection
     pub fn infect_init(&mut self) {
-        self.infection_status = InfectionStatus::Infected;
+        self.infect();
         self.infected_by = None;
     }
 
     // self infect called when debate is lost
-    fn infect(&mut self, infected_by: u32) {
-        self.infection_status = InfectionStatus::Infected;
+    pub fn infect_by(&mut self, infected_by: u32) {
+        self.infect();
         self.infected_by = Some(infected_by);
+    }
+
+    fn infect(&mut self) {
+        self.infection_status = InfectionStatus::Infected;
     }
 
     // self immune called when debate is won
@@ -84,7 +88,7 @@ mod tests {
         let mut agent = Agent::new(0, "model".to_string());
         let infector_id = 1;
 
-        agent.infect(infector_id);
+        agent.infect_by(infector_id);
 
         assert!(agent.is_infected());
         assert!(!agent.is_healthy());
