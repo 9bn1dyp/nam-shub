@@ -1,8 +1,7 @@
-use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
 // network topology of agents
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct Topology {
     connections: HashMap<u32, HashSet<u32>>,
 }

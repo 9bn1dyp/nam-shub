@@ -1,7 +1,6 @@
 use crate::debate::Debate;
-use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum InfectionStatus {
     #[default]
     Healthy, // hasnt debated
@@ -40,6 +39,12 @@ impl<'debate> Agent<'debate> {
 
     pub fn is_immune(&self) -> bool {
         self.infection_status == InfectionStatus::Immune
+    }
+
+    // init infection called on agents who start with the infection
+    pub fn infect_init(&mut self) {
+        self.infection_status = InfectionStatus::Infected;
+        self.infected_by = None;
     }
 
     // self infect called when debate is lost
