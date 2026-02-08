@@ -1,0 +1,11 @@
+[package]
+name = "debate_engine"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+core = { path = "../core" }
+tokio = { version = "1.43", features = ["full"] }
+genai = "*"
+anyhow = "1.0"
+dotenv = "0.15" 

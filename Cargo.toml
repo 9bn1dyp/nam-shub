@@ -1,2 +1,3 @@
 [workspace]
-members = ["core"]
+members = ["core", "debate_engine"]
+resolver = "2"
