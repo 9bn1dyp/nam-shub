@@ -1,4 +1,4 @@
-use rand::{Rng, thread_rng};
+use rand::Rng;
 use std::collections::{HashMap, HashSet};
 
 // network topology of agents
@@ -25,14 +25,8 @@ impl Topology {
             return;
         }
 
-        self.connections
-            .entry(agent_a)
-            .or_insert_with(HashSet::new)
-            .insert(agent_b);
-        self.connections
-            .entry(agent_b)
-            .or_insert_with(HashSet::new)
-            .insert(agent_a);
+        self.connections.entry(agent_a).or_default().insert(agent_b);
+        self.connections.entry(agent_b).or_default().insert(agent_a);
     }
 
     // remove connection
@@ -140,14 +134,14 @@ impl TopologyBuilder {
         topology
     }
 
-    // random network with gen_bool
+    // random network with random_bool
     pub fn random(agent_ids: &[u32], connection_probability: f64) -> Topology {
         let mut topology = Topology::new();
-        let mut rng = thread_rng();
+        let mut rng = rand::rng();
 
         for i in 0..agent_ids.len() {
             for j in (i + 1)..agent_ids.len() {
-                if rng.gen_bool(connection_probability) {
+                if rng.random_bool(connection_probability) {
                     topology.add_connection(agent_ids[i], agent_ids[j]);
                 }
             }

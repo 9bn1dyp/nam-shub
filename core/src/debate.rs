@@ -10,25 +10,25 @@ pub struct Message {
 // each exchange in debate
 #[derive(Debug, Clone, PartialEq)]
 pub struct Exchange {
-    // message struct attackers message, defenders reply
-    pub attacker: Message,
-    pub defender: Message,
+    // message struct proposer message, opposer reply
+    pub proposer: Message,
+    pub opposer: Message,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum DebateOutcome {
     #[default]
     Ongoing,
-    AttackerWon,
-    DefenderWon,
+    ProposerWon,
+    OpposerWon,
 }
 
 impl fmt::Display for DebateOutcome {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             DebateOutcome::Ongoing => write!(f, "Ongoing"),
-            DebateOutcome::AttackerWon => write!(f, "Attacker won"),
-            DebateOutcome::DefenderWon => write!(f, "Defender won"),
+            DebateOutcome::ProposerWon => write!(f, "Proposer won"),
+            DebateOutcome::OpposerWon => write!(f, "Opposer won"),
         }
     }
 }
@@ -36,8 +36,8 @@ impl fmt::Display for DebateOutcome {
 // full debate between both agents, both agents will ref this in their structs
 #[derive(Debug, Clone, PartialEq)]
 pub struct Debate {
-    pub attacker_id: u32,
-    pub defender_id: u32,
+    pub proposer_id: u32,
+    pub opposer_id: u32,
 
     // max turns for each agent
     pub max_turns: usize,
@@ -48,10 +48,10 @@ pub struct Debate {
 }
 
 impl Debate {
-    pub fn new(attacker_id: u32, defender_id: u32, max_turns: usize) -> Self {
+    pub fn new(proposer_id: u32, opposer_id: u32, max_turns: usize) -> Self {
         Self {
-            attacker_id,
-            defender_id,
+            proposer_id,
+            opposer_id,
             max_turns,
             exchanges: Vec::new(),
             outcome: DebateOutcome::default(),
@@ -65,7 +65,7 @@ impl Debate {
 
     // check if max exchange already reached
     pub fn is_complete(&self) -> bool {
-        self.exchanges.len() - 1 == self.max_turns
+        self.exchanges.len() >= self.max_turns
     }
 
     // set judge outcome
@@ -77,10 +77,10 @@ impl Debate {
     pub fn format_transcript(&self) -> String {
         // debate info
         let mut transcript = format!(
-            "Debate: Agent {} (Attacker) vs Agent {} (Defender)\n
+            "Debate: Agent {} (Proposer) vs Agent {} (Opposer)\n
              Max turns per agent: {}\n
              Status: {:?}\n\n",
-            self.attacker_id, self.defender_id, self.max_turns, self.outcome
+            self.proposer_id, self.opposer_id, self.max_turns, self.outcome
         );
 
         // exchanges
@@ -88,13 +88,13 @@ impl Debate {
             transcript.push_str(&format!(
                 "
                 Round {}\n
-                Agent {} (Attacker) Message: {}\n
-                Agent {} (Defender) Reply: {}\n\n",
+                Agent {} (Proposer) Message: {}\n
+                Agent {} (Opposer) Reply: {}\n\n",
                 i + 1,
-                self.attacker_id,
-                turn.attacker.message,
-                self.defender_id,
-                turn.defender.message,
+                self.proposer_id,
+                turn.proposer.message,
+                self.opposer_id,
+                turn.opposer.message,
             ));
         }
 

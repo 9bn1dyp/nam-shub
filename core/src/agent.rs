@@ -1,5 +1,3 @@
-use crate::debate::Debate;
-
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum InfectionStatus {
     #[default]
@@ -9,22 +7,20 @@ pub enum InfectionStatus {
 }
 
 #[derive(Debug, Clone)]
-pub struct Agent<'debate> {
+pub struct Agent {
     pub id: u32,
     // ai model agent uses todo!
     pub model: String,
     pub infection_status: InfectionStatus,
-    pub debate_history: Vec<&'debate Debate>,
     pub infected_by: Option<u32>,
 }
 
-impl<'debate> Agent<'debate> {
+impl Agent {
     pub fn new(id: u32, model: String) -> Self {
         Self {
             id,
             model,
             infection_status: InfectionStatus::default(),
-            debate_history: Vec::new(),
             infected_by: None,
         }
     }
@@ -39,32 +35,6 @@ impl<'debate> Agent<'debate> {
 
     pub fn is_immune(&self) -> bool {
         self.infection_status == InfectionStatus::Immune
-    }
-
-    // init infection called on agents who start with the infection
-    pub fn infect_init(&mut self) {
-        self.infect();
-        self.infected_by = None;
-    }
-
-    // self infect called when debate is lost
-    pub fn infect_by(&mut self, infected_by: u32) {
-        self.infect();
-        self.infected_by = Some(infected_by);
-    }
-
-    fn infect(&mut self) {
-        self.infection_status = InfectionStatus::Infected;
-    }
-
-    // self immune called when debate is won
-    fn immune(&mut self) {
-        self.infection_status = InfectionStatus::Immune;
-    }
-
-    // log previous debate to history
-    pub fn add_debate(&mut self, debate: &'debate Debate) {
-        self.debate_history.push(debate);
     }
 }
 
@@ -84,41 +54,7 @@ mod tests {
     }
 
     #[test]
-    fn test_agent_infection() {
-        let mut agent = Agent::new(0, "model".to_string());
-        let infector_id = 1;
-
-        agent.infect_by(infector_id);
-
-        assert!(agent.is_infected());
-        assert!(!agent.is_healthy());
-        assert_eq!(agent.infected_by, Some(infector_id));
-    }
-
-    #[test]
-    fn test_agent_immunity() {
-        let mut agent = Agent::new(0, "model".to_string());
-
-        agent.immune();
-
-        assert!(agent.is_immune());
-        assert!(!agent.is_healthy());
-        assert!(!agent.is_infected());
-    }
-
-    #[test]
     fn test_infection_status_default() {
         assert_eq!(InfectionStatus::default(), InfectionStatus::Healthy);
-    }
-
-    #[test]
-    fn test_debate_history() {
-        let mut agent = Agent::new(0, "model".to_string());
-        let debate = crate::debate::Debate::new(0, 1, 2);
-
-        agent.add_debate(&debate);
-
-        assert_eq!(agent.debate_history.len(), 1);
-        assert_eq!(agent.debate_history[0], &debate);
     }
 }
