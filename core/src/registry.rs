@@ -1,6 +1,7 @@
 use crate::agent::{Agent, InfectionStatus};
 use crate::debate::DebateOutcome;
 use crate::topology::Topology;
+use anyhow::Context;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone)]
@@ -92,13 +93,13 @@ impl Registry {
     }
 
     // calls infect_init() for agents who start with the infection
-    pub fn infect_patient_init(&mut self, agent_id: u32) -> Result<(), String> {
+    pub fn infect_patient_init(&mut self, agent_id: u32) -> anyhow::Result<()> {
         if let Some(agent) = self.agents.get_mut(&agent_id) {
             agent.infection_status = crate::agent::InfectionStatus::Infected;
             agent.infected_by = None;
             Ok(())
         } else {
-            Err(format!("Agent {} not found", agent_id))
+            anyhow::bail!(format!("Agent {} not found", agent_id))
         }
     }
 
@@ -108,11 +109,11 @@ impl Registry {
         proposer_id: u32,
         opposer_id: u32,
         outcome: DebateOutcome,
-    ) -> Result<(), String> {
+    ) -> anyhow::Result<()> {
         let opposer = self
             .agents
             .get_mut(&opposer_id)
-            .ok_or("opposer not found")?;
+            .with_context(|| format!("opposer agent with id {} not found", opposer_id))?;
 
         // Apply outcome
         match outcome {
@@ -130,39 +131,39 @@ impl Registry {
     }
 
     // validate debate agents
-    pub fn can_debate(&self, proposer_id: u32, opposer_id: u32) -> Result<(), String> {
+    pub fn can_debate(&self, proposer_id: u32, opposer_id: u32) -> anyhow::Result<()> {
         // Check both agents exist
         let proposer = self
             .agents
             .get(&proposer_id)
-            .ok_or_else(|| format!("proposer {} not found", proposer_id))?;
+            .with_context(|| format!("proposer {} not found", proposer_id))?;
         let opposer = self
             .agents
             .get(&opposer_id)
-            .ok_or_else(|| format!("opposer {} not found", opposer_id))?;
+            .with_context(|| format!("opposer {} not found", opposer_id))?;
 
         // Check proposer is infected
         if !proposer.is_infected() {
-            return Err(format!("proposer {} is not infected", proposer_id));
+            anyhow::bail!(format!("proposer {} is not infected", proposer_id))
         }
 
         // Check opposer is healthy
         if !opposer.is_healthy() {
-            return Err(format!("opposer {} is not healthy", opposer_id));
+            anyhow::bail!(format!("opposer {} is not healthy", opposer_id))
         }
 
         // Check topology exist
         let topology = match &self.topology {
             Some(t) => t,
-            None => return Err(String::from("Topology does not exist")),
+            None => anyhow::bail!("Topology does not exist"),
         };
 
         // Check connection exists
         if !topology.are_connected(proposer_id, opposer_id) {
-            return Err(format!(
+            anyhow::bail!(format!(
                 "Agents {} and {} are not connected",
                 proposer_id, opposer_id
-            ));
+            ))
         }
 
         Ok(())
@@ -196,6 +197,18 @@ impl Registry {
             },
         }
     }
+
+    pub fn get_graph_data(&self) -> (Vec<u32>, Vec<(u32, u32)>) {
+        let agent_ids = self.get_all_agent_ids();
+
+        let connections = if let Some(topology) = &self.topology {
+            topology.get_all_connections()
+        } else {
+            Vec::new()
+        };
+
+        (agent_ids, connections)
+    }
 }
 
 impl Default for Registry {
@@ -212,24 +225,6 @@ pub struct RegistryStatistics {
     pub healthy_agents: usize,
     pub immune_agents: usize,
     pub total_connections: usize,
-}
-
-impl RegistryStatistics {
-    pub fn infection_rate(&self) -> f64 {
-        if self.total_agents == 0 {
-            0.0
-        } else {
-            self.infected_agents as f64 / self.total_agents as f64
-        }
-    }
-
-    pub fn immunity_rate(&self) -> f64 {
-        if self.total_agents == 0 {
-            0.0
-        } else {
-            self.immune_agents as f64 / self.total_agents as f64
-        }
-    }
 }
 
 #[cfg(test)]
