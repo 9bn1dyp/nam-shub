@@ -8,4 +8,3 @@ core = { path = "../core" }
 tokio = { version = "1.43", features = ["full"] }
 genai = "*"
 anyhow = "1.0"
-dotenv = "0.15" 
