@@ -1,0 +1,11 @@
+[package]
+name = "app"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+debate_engine = { path = "../debate_engine" }
+core = { path = "../core" }
+anyhow = "1.0.101"
+dotenv = "0.15.0"
+tokio = "1.49.0"
