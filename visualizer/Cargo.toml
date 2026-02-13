@@ -1,0 +1,13 @@
+[package]
+name = "visualizer"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+debate_engine = { path = "../debate_engine" }
+core = { path = "../core" }
+anyhow = "1.0.101"
+eframe = "0.33.3"
+egui = "0.33.3"
+petgraph = "0.8.3"
+egui_graphs = "0.29.0"
