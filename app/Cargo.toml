@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+visualizer = { path = "../visualizer"}
 debate_engine = { path = "../debate_engine" }
 core = { path = "../core" }
 anyhow = "1.0.101"

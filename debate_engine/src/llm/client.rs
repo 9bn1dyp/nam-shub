@@ -42,6 +42,9 @@ pub async fn judge_debate(
 
     messages.push(ChatMessage::user(&transcript));
     messages.push(ChatMessage::user("Who won?"));
+    messages.push(ChatMessage::user(
+        "Respond with only one word 'OPPOSITION' OR 'PROPOSITION'",
+    ));
 
     let response = send_message(client, judge_model, &messages).await?;
 

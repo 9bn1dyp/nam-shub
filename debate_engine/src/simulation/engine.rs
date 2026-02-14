@@ -202,4 +202,12 @@ impl SimulationResult {
             self.immune as f64 / self.total_agents as f64
         }
     }
+
+    pub fn healthy_rate(&self) -> f64 {
+        if self.total_agents == 0 {
+            0.0
+        } else {
+            self.healthy as f64 / self.total_agents as f64
+        }
+    }
 }
